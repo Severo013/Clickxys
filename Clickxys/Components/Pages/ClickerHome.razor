@@ -1,0 +1,107 @@
+﻿@page "/"
+@rendermode InteractiveServer
+
+<PageTitle>Home</PageTitle>
+
+<div>
+    <h1>Bem vindo ao Clickxys</h1>
+    <label>Clique para a vitória</label>
+</div>
+
+<div>
+    <label>Pontuação: @CountPontuacao Coins</label>
+    <div>
+        <MudButton @onclick=@AumentaPontuacao>Clique em mim!</MudButton>
+    </div>
+</div>
+
+@if (HabilitaUpgradeClick)
+{
+    <div>
+        <MudButton @onclick=@UpgradeClick Disabled=@(CountPontuacao < PrecoMultiplicador)>Aumentar multiplicador | @StringPrecoMultiplicador</MudButton>
+        <label>@StringMultiplicador</label>
+    </div>
+}
+
+@if (HabilitaComprarMaquina)
+{
+    <div>
+        <MudButton @onclick=@ComprarMaquinaClick Disabled=@(CountPontuacao < PrecoMaquina)>Comprar máquina | @PrecoMaquina</MudButton>
+        <label>@QuantidadeMaquinas</label>
+    </div>
+}
+
+@code {
+
+    public decimal CountPontuacao = 0;
+    public decimal CountPontuacaoPassiva = 0;
+
+    public int PrecoMultiplicador = PrecoInicialMultiplicador;
+    public int MultiplicadorClicks = 1;
+
+    public decimal PrecoMaquina = PrecoInicialMaquina;
+    public int QuantidadeMaquinas = 0;
+    public decimal GanhoPassivoMaquina = 100;
+
+    public bool HabilitaUpgradeClick = false;
+    public bool HabilitaComprarMaquina = false;
+
+    private string StringMultiplicador => $"Multiplicador Atual: {MultiplicadorClicks}x";
+    private string StringPrecoMultiplicador => $"Preço: {PrecoMultiplicador} coins";
+
+    private string StringMaquina => $"Máquinas: {QuantidadeMaquinas}x";
+    private string StringPrecoMaquina => $"Preço: {PrecoMaquina} coins";
+
+    private const int PrecoInicialMultiplicador = 100;
+    private const int PrecoInicialMaquina = 1024;
+
+    private Timer? TimerGanho = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        TimerGanho = new Timer(UpdateCoinsLoop, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+    }
+
+    private void UpdateCoinsLoop(object? state)
+    {
+        if (CountPontuacaoPassiva == 0)
+            return;
+
+        CountPontuacao += CountPontuacaoPassiva;
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void AumentaPontuacao()
+    {
+        CountPontuacao += 1 * MultiplicadorClicks;
+        VerificaUpgrades();
+    }
+
+    public void VerificaUpgrades()
+    {
+        if (CountPontuacao > PrecoInicialMultiplicador)
+        {
+            HabilitaUpgradeClick = true;
+        }
+
+        if (CountPontuacao > PrecoInicialMaquina)
+        {
+            HabilitaComprarMaquina = true;
+        }
+    }
+
+    public void UpgradeClick()
+    {
+        CountPontuacao -= PrecoMultiplicador;
+        PrecoMultiplicador *= MultiplicadorClicks;
+        MultiplicadorClicks++;
+    }
+
+    public void ComprarMaquinaClick()
+    {
+        CountPontuacao -= PrecoMaquina;
+        PrecoMaquina *= 1.10m;
+        QuantidadeMaquinas++;
+        CountPontuacaoPassiva += GanhoPassivoMaquina;
+    }
+}
