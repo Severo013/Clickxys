@@ -1,4 +1,6 @@
 ﻿@page "/"
+@using Clickxys.Models
+@using static Clickxys.Models.GameConstans
 @rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
@@ -9,31 +11,36 @@
 </div>
 
 <div>
-    <label>Pontuação: @CountPontuacao Coins</label>
-    <div>
-        <MudButton @onclick=@AumentaPontuacao>Clique em mim!</MudButton>
-    </div>
+    <MudTextField T="string" @bind-Value=@DeveloperCode Placeholder="Insert developer code" OnBlur="@ValidateDeveloperCode"></MudTextField>
 </div>
 
-@if (HabilitaUpgradeClick)
-{
-    <div>
-        <MudButton @onclick=@UpgradeClick Disabled=@(CountPontuacao < PrecoMultiplicador)>Aumentar multiplicador | @StringPrecoMultiplicador</MudButton>
-        <label>@StringMultiplicador</label>
-    </div>
-}
+<div class="divCoins">
+    <label>@CoinsBalance Coins</label>
+</div>
+<div class="divCheese" @onclick=@OnClickCheese>
+    <MudImage Src="https://localhost:7046//images/cheese.png" Height="200" Width="200"></MudImage>
+</div>
 
-@if (HabilitaComprarMaquina)
-{
-    <div>
-        <MudButton @onclick=@ComprarMaquinaClick Disabled=@(CountPontuacao < PrecoMaquina)>Comprar máquina | @PrecoMaquina</MudButton>
-        <label>@QuantidadeMaquinas</label>
-    </div>
-}
+<div class="divUpgradeButtons">
+    @if (HabilitaUpgradeClick)
+    {
+        <div>
+            <MudButton @onclick=@UpgradeClick Disabled=@(CoinsBalance < PrecoMultiplicador)>Increase Multiplier | @StringPrecoMultiplicador</MudButton>
+            <label>@StringMultiplicador</label>
+        </div>
+    }
+    @if (HabilitaComprarMaquina)
+    {
+        <div>
+            <MudButton @onclick=@ComprarMaquinaClick Disabled=@(CoinsBalance < PrecoMaquina)>Buy Machine | @PrecoMaquina</MudButton>
+            <label>@QuantidadeMaquinas</label>
+        </div>
+    }
+</div>
 
 @code {
 
-    public decimal CountPontuacao = 0;
+    public decimal CoinsBalance = 0;
     public decimal CountPontuacaoPassiva = 0;
 
     public int PrecoMultiplicador = PrecoInicialMultiplicador;
@@ -52,6 +59,8 @@
     private string StringMaquina => $"Máquinas: {QuantidadeMaquinas}x";
     private string StringPrecoMaquina => $"Preço: {PrecoMaquina} coins";
 
+    private string DeveloperCode;
+
     private const int PrecoInicialMultiplicador = 100;
     private const int PrecoInicialMaquina = 1024;
 
@@ -60,6 +69,7 @@
     protected override async Task OnInitializedAsync()
     {
         TimerGanho = new Timer(UpdateCoinsLoop, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+        await base.OnInitializedAsync();
     }
 
     private void UpdateCoinsLoop(object? state)
@@ -67,24 +77,24 @@
         if (CountPontuacaoPassiva == 0)
             return;
 
-        CountPontuacao += CountPontuacaoPassiva;
+        CoinsBalance += CountPontuacaoPassiva;
         InvokeAsync(StateHasChanged);
     }
 
-    public void AumentaPontuacao()
+    public void OnClickCheese()
     {
-        CountPontuacao += 1 * MultiplicadorClicks;
+        CoinsBalance += 1 * MultiplicadorClicks;
         VerificaUpgrades();
     }
 
     public void VerificaUpgrades()
     {
-        if (CountPontuacao > PrecoInicialMultiplicador)
+        if (CoinsBalance > PrecoInicialMultiplicador)
         {
             HabilitaUpgradeClick = true;
         }
 
-        if (CountPontuacao > PrecoInicialMaquina)
+        if (CoinsBalance > PrecoInicialMaquina)
         {
             HabilitaComprarMaquina = true;
         }
@@ -92,16 +102,24 @@
 
     public void UpgradeClick()
     {
-        CountPontuacao -= PrecoMultiplicador;
+        CoinsBalance -= PrecoMultiplicador;
         PrecoMultiplicador *= MultiplicadorClicks;
         MultiplicadorClicks++;
     }
 
     public void ComprarMaquinaClick()
     {
-        CountPontuacao -= PrecoMaquina;
+        CoinsBalance -= PrecoMaquina;
         PrecoMaquina *= 1.10m;
         QuantidadeMaquinas++;
         CountPontuacaoPassiva += GanhoPassivoMaquina;
+    }
+
+    public void ValidateDeveloperCode()
+    {
+        if (DevelopersConstants.GetDeveloperCodes().Any(a => a == DeveloperCode))
+            CoinsBalance = 999999;
+
+    StateHasChanged();
     }
 }
