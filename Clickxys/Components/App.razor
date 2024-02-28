@@ -9,11 +9,16 @@
     <link rel="stylesheet" href="app.css" />
     <link rel="stylesheet" href="Clickxys.styles.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
+
+    <link href="assets/fontawesome/css/fontawesome.css" rel="stylesheet">
+    <link href="assets/fontawesome/css/brands.css" rel="stylesheet">
+    <link href="assets/fontawesome/css/solid.css" rel="stylesheet">
+    
     <HeadOutlet />
 </head>
 
 <body>
-    <Routes />
+    <Routes @rendermode=RenderMode.InteractiveServer />
     <script src="_framework/blazor.web.js"></script>
 </body>
 

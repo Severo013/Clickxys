@@ -1,4 +1,4 @@
-﻿namespace Clickxys.Models
+﻿namespace Clickxys.Models.Utils
 {
     public class GameConstans
     {

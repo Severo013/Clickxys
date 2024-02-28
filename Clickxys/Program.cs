@@ -1,3 +1,4 @@
+using Blazored.LocalStorage;
 using Clickxys.Components;
 using MudBlazor.Services;
 
@@ -8,6 +9,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddMudServices();
+builder.Services.AddBlazoredLocalStorage();
 
 var app = builder.Build();
 

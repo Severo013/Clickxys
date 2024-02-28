@@ -1,6 +1,10 @@
 ﻿@page "/"
+
 @using Clickxys.Models
-@using static Clickxys.Models.GameConstans
+
+@using static Clickxys.Models.Utils.GameConstans
+@using static Clickxys.Models.Utils.CurrencyToStringConverter
+
 @rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
@@ -15,86 +19,76 @@
 </div>
 
 <div class="divCoins">
-    <label>@CoinsBalance Coins</label>
+    <label>@CurrencyToString(Currency.CurrentBalance) Cheeses</label>
 </div>
 <div class="divCheese" @onclick=@OnClickCheese>
-    <MudImage Src="https://localhost:7046//images/cheese.png" Height="200" Width="200"></MudImage>
+    <MudImage Src="./images/cheese.png" Height="250" Width="250"></MudImage>
 </div>
 
 <div class="divUpgradeButtons">
     @if (HabilitaUpgradeClick)
     {
         <div>
-            <MudButton @onclick=@UpgradeClick Disabled=@(CoinsBalance < PrecoMultiplicador)>Increase Multiplier | @StringPrecoMultiplicador</MudButton>
-            <label>@StringMultiplicador</label>
+            <MudButton @onclick=@UpgradeClick Disabled=@(Currency.CurrentBalance < ClickInfo.Price)>Increase Multiplier | @CurrencyToString(ClickInfo.Price)</MudButton>
+            <label>@($"Multiplicador Atual: {ClickInfo.Level}x")</label>
         </div>
     }
     @if (HabilitaComprarMaquina)
     {
         <div>
-            <MudButton @onclick=@ComprarMaquinaClick Disabled=@(CoinsBalance < PrecoMaquina)>Buy Machine | @PrecoMaquina</MudButton>
-            <label>@QuantidadeMaquinas</label>
+            <MudButton @onclick=@ComprarMaquinaClick Disabled=@(Currency.CurrentBalance < MachineInfo.Price)>Buy Machine | @CurrencyToString(MachineInfo.Price)</MudButton>
+            <label>@MachineInfo.Level</label>
         </div>
     }
 </div>
 
 @code {
 
-    public decimal CoinsBalance = 0;
-    public decimal CountPontuacaoPassiva = 0;
-
-    public int PrecoMultiplicador = PrecoInicialMultiplicador;
-    public int MultiplicadorClicks = 1;
-
-    public decimal PrecoMaquina = PrecoInicialMaquina;
-    public int QuantidadeMaquinas = 0;
-    public decimal GanhoPassivoMaquina = 100;
-
     public bool HabilitaUpgradeClick = false;
     public bool HabilitaComprarMaquina = false;
 
-    private string StringMultiplicador => $"Multiplicador Atual: {MultiplicadorClicks}x";
-    private string StringPrecoMultiplicador => $"Preço: {PrecoMultiplicador} coins";
-
-    private string StringMaquina => $"Máquinas: {QuantidadeMaquinas}x";
-    private string StringPrecoMaquina => $"Preço: {PrecoMaquina} coins";
-
     private string DeveloperCode;
-
-    private const int PrecoInicialMultiplicador = 100;
-    private const int PrecoInicialMaquina = 1024;
 
     private Timer? TimerGanho = null;
 
+    public Player Player { get; set; } = new();
+    public CurrencyInfo Currency { get; set; }
+    public MachineInfo MachineInfo { get; set; }
+    public ClickInfo ClickInfo { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
+        Currency = Player.Currency;
+        MachineInfo = Player.Machines;
+        ClickInfo = Player.ClickInfo;
+
         TimerGanho = new Timer(UpdateCoinsLoop, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
         await base.OnInitializedAsync();
     }
 
     private void UpdateCoinsLoop(object? state)
     {
-        if (CountPontuacaoPassiva == 0)
+        if (Currency.PassiveIncome == 0)
             return;
 
-        CoinsBalance += CountPontuacaoPassiva;
+        Currency.CurrentBalance += Currency.PassiveIncome;
         InvokeAsync(StateHasChanged);
     }
 
     public void OnClickCheese()
     {
-        CoinsBalance += 1 * MultiplicadorClicks;
-        VerificaUpgrades();
+        Currency.CurrentBalance += 1 * ClickInfo.Level;
+        VerifyUpgrades();
     }
 
-    public void VerificaUpgrades()
+    public void VerifyUpgrades()
     {
-        if (CoinsBalance > PrecoInicialMultiplicador)
+        if (Currency.CurrentBalance > ClickInfo.InitialPrice)
         {
             HabilitaUpgradeClick = true;
         }
 
-        if (CoinsBalance > PrecoInicialMaquina)
+        if (Currency.CurrentBalance > MachineInfo.InitialPrice)
         {
             HabilitaComprarMaquina = true;
         }
@@ -102,24 +96,24 @@
 
     public void UpgradeClick()
     {
-        CoinsBalance -= PrecoMultiplicador;
-        PrecoMultiplicador *= MultiplicadorClicks;
-        MultiplicadorClicks++;
+        Currency.DecreaseBalance(ClickInfo.Price);
+        ClickInfo.IncreaseLevel();
+        ClickInfo.UpdatePrice();
     }
 
     public void ComprarMaquinaClick()
     {
-        CoinsBalance -= PrecoMaquina;
-        PrecoMaquina *= 1.10m;
-        QuantidadeMaquinas++;
-        CountPontuacaoPassiva += GanhoPassivoMaquina;
+        Currency.DecreaseBalance(MachineInfo.Price);
+        MachineInfo.IncreaseLevel(); 
+        MachineInfo.UpdatePrice();
+        Currency.IncreasePassiveIncome(MachineInfo.CurrentIncome);
     }
 
     public void ValidateDeveloperCode()
     {
         if (DevelopersConstants.GetDeveloperCodes().Any(a => a == DeveloperCode))
-            CoinsBalance = 999999;
+            Currency.SetBalance(999999);
 
-    StateHasChanged();
+        StateHasChanged();
     }
 }

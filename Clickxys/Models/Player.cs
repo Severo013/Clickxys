@@ -7,9 +7,9 @@ namespace Clickxys.Models
         public string Nickname { get; set; }
         public string Photourl { get; set; }
         public string Country { get; set; }
-        public DateTime LastTimeOnlyne { get; set; }
-        public MachineInfo Machines { get; set; }
-        public ClickInfo ClickInfo { get; set; }
-        public CurrencyInfo Currency { get; set; }
+        public DateTime LastTimeOnline { get; set; }
+        public MachineInfo Machines { get; set; } = new();
+        public ClickInfo ClickInfo { get; set; } = new();
+        public CurrencyInfo Currency { get; set; } = new();
     }
 }
