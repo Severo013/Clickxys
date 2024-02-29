@@ -1,4 +1,4 @@
-<MudDialog>
+<MudDialog IsVisible="OnAfterRenderComplete">
     <DialogContent>
         Dialog Content
     </DialogContent>
@@ -9,8 +9,17 @@
 </MudDialog>
 
 @code {
+
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    private bool OnAfterRenderComplete = false;
 
     void Submit() => MudDialog.Close(DialogResult.Ok(true));
     void Cancel() => MudDialog.Cancel();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        OnAfterRenderComplete = true;
+    }
 }
