@@ -1,44 +1,18 @@
-﻿@inject IDialogService DialogService
+﻿@using Clickxys.Components.Modals
 
-<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">Clickxys</a>
-    </div>
-</div>
+@inject IDialogService DialogService
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+<MudNavMenu>
+    <MudNavLink Href="/" Match="NavLinkMatch.All">Click</MudNavLink>
+    <MudNavLink OnClick="OpenUpgradesModal" Match="NavLinkMatch.Prefix">Upgrades</MudNavLink>
+    <MudNavLink Href="/about" Match="NavLinkMatch.Prefix">About</MudNavLink>
+</MudNavMenu>
 
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi fa-solid fa-cheese" aria-hidden="true"></span> Click
-            </NavLink>
-        </div>
-        
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" @onclick="OpenUpgradesModal">
-                <span  class="bi fa-solid fa-circle-up" aria-hidden="true"></span> Upgrades
-            </NavLink>
-        </div>
-        
-        <div class="nav-item px-3">
-                <MudButton IconClass="fa-solid fa-circle-up" @onclick="OpenUpgradesModal">UpGRADCE</MudButton>
-        </div>
-@* 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div> *@
-    </nav>
-</div>
-
-@code{
+@code {
 
     public void OpenUpgradesModal()
     {
         var options = new DialogOptions { CloseOnEscapeKey = true };
-        DialogService.Show<UpgradeComponent>("Simple Dialog", options);
+        DialogService.Show<UpgradeComponentModal>("Upgrades", options);
     }
-}
+} 

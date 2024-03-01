@@ -1,49 +1,47 @@
 ﻿@page "/"
 
+@using Clickxys.Components.Layout
 @using Clickxys.Models
 
 @using static Clickxys.Models.Utils.GameConstans
 @using static Clickxys.Models.Utils.CurrencyToStringConverter
 
-@rendermode InteractiveServer
+<MudContainer>
+    <div>
+        <h1>Clickxys</h1>
+        <label>Click the cheese</label>
+    </div>
 
-<PageTitle>Home</PageTitle>
+    <div>
+        <MudTextField T="string" @bind-Value=@DeveloperCode Placeholder="Insert developer code" OnBlur="@ValidateDeveloperCode"></MudTextField>
+    </div>
 
-<div>
-    <h1>Bem vindo ao Clickxys</h1>
-    <label>Clique para a vitória</label>
-</div>
+    <div class="div-balance">
+        <label>@CurrencyToString(Currency.CurrentBalance) Cheeses</label>
+    </div>
+    <div class="div-cheese">
+        <MudImage @onclick=@OnClickCheese Src ="./images/cheese.png" Height="250" Width="250"></MudImage>
+    </div>
 
-<div>
-    <MudTextField T="string" @bind-Value=@DeveloperCode Placeholder="Insert developer code" OnBlur="@ValidateDeveloperCode"></MudTextField>
-</div>
-
-<div class="divCoins">
-    <label>@CurrencyToString(Currency.CurrentBalance) Cheeses</label>
-</div>
-<div class="divCheese" @onclick=@OnClickCheese>
-    <MudImage Src="./images/cheese.png" Height="250" Width="250"></MudImage>
-</div>
-
-<div class="divUpgradeButtons">
-    @if (HabilitaUpgradeClick)
-    {
-        <div>
-            <MudButton @onclick=@UpgradeClick Disabled=@(Currency.CurrentBalance < ClickInfo.Price)>Increase Multiplier | @CurrencyToString(ClickInfo.Price)</MudButton>
-            <label>@($"Multiplicador Atual: {ClickInfo.Level}x")</label>
-        </div>
-    }
-    @if (HabilitaComprarMaquina)
-    {
-        <div>
-            <MudButton @onclick=@ComprarMaquinaClick Disabled=@(Currency.CurrentBalance < MachineInfo.Price)>Buy Machine | @CurrencyToString(MachineInfo.Price)</MudButton>
-            <label>@MachineInfo.Level</label>
-        </div>
-    }
-</div>
+    <div class="div-upgrades">
+        @if (HabilitaUpgradeClick)
+        {
+            <div>
+                <MudButton @onclick=@UpgradeClick Disabled=@(Currency.CurrentBalance < ClickInfo.Price)>Increase Multiplier | @CurrencyToString(ClickInfo.Price)</MudButton>
+                <label>@($"Multiplicador Atual: {ClickInfo.Level}x")</label>
+            </div>
+        }
+        @if (HabilitaComprarMaquina)
+        {
+            <div>
+                <MudButton @onclick=@ComprarMaquinaClick Disabled=@(Currency.CurrentBalance < MachineInfo.Price)>Buy Machine | @CurrencyToString(MachineInfo.Price)</MudButton>
+                <label>@MachineInfo.Level</label>
+            </div>
+        }
+    </div>
+</MudContainer>
 
 @code {
-
     public bool HabilitaUpgradeClick = false;
     public bool HabilitaComprarMaquina = false;
 
@@ -104,7 +102,7 @@
     public void ComprarMaquinaClick()
     {
         Currency.DecreaseBalance(MachineInfo.Price);
-        MachineInfo.IncreaseLevel(); 
+        MachineInfo.IncreaseLevel();
         MachineInfo.UpdatePrice();
         Currency.IncreasePassiveIncome(MachineInfo.CurrentIncome);
     }

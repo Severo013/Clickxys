@@ -1,24 +1,20 @@
-﻿body {
-    color: aqua;
-}
-
-.divCoins {
+﻿.div-balance {
     display: flex;
     justify-content: center;
     padding-top: 15px;
 }
 
-.divCheese {
+.div-cheese {
     display: flex;
     justify-content: center;
     padding: 15px;
 }
 
-.divUpgradeButtons {
+.div-upgrades {
     display: flex;
     flex-direction: column;
 }
 
-    .divUpgradeButtons > div {
+    .div-upgrades > div {
         margin-bottom: 10px;
     }
